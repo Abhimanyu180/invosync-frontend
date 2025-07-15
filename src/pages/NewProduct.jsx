@@ -47,11 +47,13 @@ const NewProduct = () => {
     }
 
     try {
+      const token = sessionStorage.getItem('token');
+      console.log("Token",token);
       const response = await axios.post(`${BASE_URL}/api/company/product`,
         {...productData},
         {
           headers:{
-            Authorization: `${sessionStorage.getItem("token")}`,
+            Authorization: `${token}`,
           }
         }
       );

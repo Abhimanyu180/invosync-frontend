@@ -105,7 +105,7 @@ const ProductSection = () => {
                     key={product._id}
                     className="border-t border-neutral-700 hover:bg-neutral-800 transition-all duration-200"
                   >
-                    <td className="py-3 px-4">{product.productNo}</td>
+                    <td className="py-3 px-4">{product.productNumber}</td>
                     <td className="py-3 px-4">{product.productName}</td>
                     <td className="py-3 px-4">
                       ₹{product.unitPrice.toFixed(2)}

@@ -1,1 +1,1 @@
-export const BASE_URL = 'https://invo-sync-backend.vercel.app';
+export const BASE_URL = 'http://localhost:8082';

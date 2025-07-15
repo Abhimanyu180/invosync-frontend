@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { IoMdArrowDropdown } from "react-icons/io";
@@ -6,13 +6,54 @@ import { GoPlus } from "react-icons/go";
 import { CiSearch } from "react-icons/ci";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
 
 const Invoices = () => {
   const [status, setStatus] = useState("Status");
   const [showDropDown, setShowDropDown] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [invoices, setInvoices] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        const res = await axios.get("http://localhost:8082/api/getAllInvoices", {
+          headers: {
+            Authorization: `${token}`,
+          },
+        });
+        setInvoices(res.data.invoices);
+      } catch (err) {
+        console.error("Failed to fetch invoices:", err);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
+
+  useEffect(() => {
+  const fetchInvoicesByDate = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const formattedDate = selectedDate.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+      const res = await axios.get(`http://localhost:8082/api/getAllInvoices/date`, {
+        headers: {
+          Authorization: `${token}`,
+        },
+        params: { date: formattedDate },
+      });
+      setInvoices(res.data.invoices);
+    } catch (err) {
+      console.error("Failed to fetch invoices:", err);
+    }
+  };
+
+  fetchInvoicesByDate();
+}, [selectedDate]);
+
 
   return (
     <div>
@@ -105,12 +146,34 @@ const Invoices = () => {
           </div>
         </div>
 
+        {/* Table Header */}
         <div className="grid grid-cols-4 text-white pl-10 pt-5 font-semibold border-b pb-2">
           <div>Invoice No.</div>
           <div>Invoice Date</div>
-          <div>Status</div>
           <div>Client</div>
+          <div>Status</div>
         </div>
+
+        {/* Invoice Rows */}
+        {invoices.length === 0 ? (
+          <div className="text-white pl-10 pt-4">No invoices available.</div>
+        ) : (
+          invoices.map((invoice) => (
+            <div
+              key={invoice._id}
+              className="grid grid-cols-4 text-white pl-10 pt-3 border-b pb-3"
+            >
+              <div>{invoice.invoiceDetails?.invoiceNumber || "N/A"}</div>
+              <div>
+                {invoice.invoiceDetails?.invoiceDate
+                  ? new Date(invoice.invoiceDetails.invoiceDate).toLocaleDateString()
+                  : "N/A"}
+              </div>
+              <div>{invoice.billTo?.name || "N/A"}</div>
+              <div>{"Due"}</div> {/* Static for now; update when real status is available */}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
