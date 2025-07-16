@@ -8,9 +8,9 @@ import Invoices from "./pages/Invoices";
 import ProductSection from "./pages/ProductSection";
 import NewProduct from "./pages/NewProduct";
 import PrivateRoute from "./PrivateRoute";
-import PersonalSetting from "./pages/PersonalSetting";
 import CreateClient from "./pages/CreateClient";
 import Clients from "./pages/Clients";
+import Setting from "./pages/Setting";
 
 function App() {
 
@@ -38,7 +38,7 @@ function App() {
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/products" element={<ProductSection />} />
           <Route path="/create/products" element={<NewProduct />} />
-          <Route path="/personal/setting" element={<PersonalSetting />} />
+          <Route path="/setting" element={<Setting />} />
           <Route path="/clients" element={<Clients />} />
           <Route path="/create/clients" element={<CreateClient />} />
         </Routes>
