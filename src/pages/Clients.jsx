@@ -11,14 +11,27 @@ const Clients = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your real API URL
     const fetchClients = async () => {
+      const token = sessionStorage.getItem("token");
       try {
-        const response = await fetch(`${BASE_URL}/api/getClients`);
+        const response = await fetch(`${BASE_URL}/api/getAllClients`, {
+          headers: {
+            Authorization: token,
+          },
+        });
+
         const data = await response.json();
-        setClients(data);
+
+        if (!response.ok) {
+          alert(data.message || "Failed to fetch clients");
+          return;
+        }
+
+        // Set only the array of clients, not the whole response
+        setClients(data.clients || []);
       } catch (error) {
         console.error("Error fetching clients:", error);
+        alert("Something went wrong. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -28,7 +41,7 @@ const Clients = () => {
   }, []);
 
   const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase())
+    client.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -91,11 +104,11 @@ const Clients = () => {
                 ) : (
                   filteredClients.map((client, index) => (
                     <tr key={index} className="border-b border-gray-700">
-                      <td className="py-3 px-4">{client.name}</td>
-                      <td className="py-3 px-4">{client.invoices}</td>
-                      <td className="py-3 px-4">{client.drafts}</td>
-                      <td className="py-3 px-4">{client.timesInvoiced}</td>
-                      <td className="py-3 px-4">{client.totalUnpaid}</td>
+                      <td className="py-3 px-4">{client.name || "-"}</td>
+                      <td className="py-3 px-4">{client.invoices ?? 0}</td>
+                      <td className="py-3 px-4">{client.drafts ?? 0}</td>
+                      <td className="py-3 px-4">{client.timesInvoiced ?? 0}</td>
+                      <td className="py-3 px-4">{client.totalUnpaid ?? "₹0.00"}</td>
                     </tr>
                   ))
                 )}

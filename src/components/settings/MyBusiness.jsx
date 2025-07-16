@@ -5,6 +5,7 @@ import { BASE_URL } from "../../Utils/urlConfig";
 const MyBusinesses = () => {
   const [businesses, setBusinesses] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     cin: "",
@@ -27,9 +28,7 @@ const MyBusinesses = () => {
 
       try {
         const response = await axios.get(`${BASE_URL}/api/getAllBusiness`, {
-          headers: {
-            Authorization: `${token}`,
-          },
+          headers: { Authorization: `${token}` },
         });
 
         if (response.status === 200 && Array.isArray(response.data.business)) {
@@ -55,16 +54,38 @@ const MyBusinesses = () => {
   };
 
   const handleAddBusiness = () => {
+    setEditIndex(null);
+    setFormData({
+      name: "",
+      cin: "",
+      gstin: "",
+      address1: "",
+      address2: "",
+      postalCode: "",
+      city: "",
+      state: "",
+      country: "India",
+      phoneNumber: "",
+      email: "",
+      website: "",
+    });
+    setShowForm(true);
+  };
+
+  const handleEditBusiness = (business, index) => {
+    setEditIndex(index);
+    setFormData({ ...business });
     setShowForm(true);
   };
 
   const handleCancel = () => {
     setShowForm(false);
+    setEditIndex(null);
     setFormData({
       name: "",
       cin: "",
       gstin: "",
-      addressLine1: "",
+      address1: "",
       address2: "",
       postalCode: "",
       city: "",
@@ -81,40 +102,37 @@ const MyBusinesses = () => {
     if (!token) return;
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/add-business`,
-        formData,
-        {
-          headers: {
-            Authorization: `${token}`,
-          },
-        }
-      );
+      if (editIndex !== null) {
+        // UPDATE existing business
+        const businessToEdit = businesses[editIndex];
 
-      if (response.status === 201) {
-        alert("Business added successfully!");
-        setShowForm(false);
-        setFormData({
-          name: "",
-          cin: "",
-          gstin: "",
-          address1: "",
-          address2: "",
-          postalCode: "",
-          city: "",
-          state: "",
-          country: "India",
-          phoneNumber: "",
-          email: "",
-          website: "",
+        await axios.put(
+          `${BASE_URL}/api/update-business/${encodeURIComponent(businessToEdit.name)}`,
+          formData,
+          { headers: { Authorization: `${token}` } }
+        );
+
+        const updatedBusinesses = [...businesses];
+        updatedBusinesses[editIndex] = formData;
+        setBusinesses(updatedBusinesses);
+        alert("Business updated successfully!");
+      } else {
+        // ADD new business
+        const response = await axios.post(`${BASE_URL}/api/add-business`, formData, {
+          headers: { Authorization: `${token}` },
         });
 
-        // Refresh list
-        setBusinesses((prev) => [...prev, response.data.business]);
+        if (response.status === 201) {
+          alert("Business added successfully!");
+          setBusinesses((prev) => [...prev, formData]);
+        }
       }
+
+      setShowForm(false);
+      setEditIndex(null);
     } catch (error) {
-      console.error("Error adding business:", error.message);
-      alert("Failed to add business.");
+      console.error("Error saving business:", error.message);
+      alert("Failed to save business.");
     }
   };
 
@@ -126,9 +144,6 @@ const MyBusinesses = () => {
           onClick={handleAddBusiness}
         >
           Add Business
-        </button>
-        <button className="bg-neutral-500 hover:bg-neutral-400 px-4 py-2 rounded-lg">
-          Edit active business
         </button>
       </div>
 
@@ -148,85 +163,52 @@ const MyBusinesses = () => {
                   <p className="text-base font-medium">{biz.name}</p>
                   <p className="text-sm text-gray-300">{biz.email}</p>
                 </div>
-                {biz.isActive && (
-                  <span className="text-sm text-green-400 font-medium">
-                    (Current)
-                  </span>
-                )}
+                <div className="flex gap-3 items-center">
+                  {biz.isActive && (
+                    <span className="text-sm text-green-400 font-medium">
+                      (Current)
+                    </span>
+                  )}
+                  <button
+                    onClick={() => handleEditBusiness(biz, idx)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+                  >
+                    Edit
+                  </button>
+                </div>
               </li>
             ))
           )}
         </ul>
       </div>
 
-      {/* Add Business Form */}
+      {/* Add/Edit Business Form */}
       {showForm && (
         <div className="bg-neutral-600 p-6 rounded-md space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Name *"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="cin"
-              placeholder="CIN"
-              value={formData.cin}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="gstin"
-              placeholder="GSTIN"
-              value={formData.gstin}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="address1"
-              placeholder="Address 1 *"
-              value={formData.address1}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="address2"
-              placeholder="Address line 2"
-              value={formData.address2}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="postalCode"
-              placeholder="Postal code *"
-              value={formData.postalCode}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="city"
-              placeholder="City/Suburb *"
-              value={formData.city}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="state"
-              placeholder="State *"
-              value={formData.state}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
+            {[
+              "name",
+              "cin",
+              "gstin",
+              "address1",
+              "address2",
+              "postalCode",
+              "city",
+              "state",
+              "phoneNumber",
+              "email",
+              "website",
+            ].map((field) => (
+              <input
+                key={field}
+                type={field === "email" ? "email" : "text"}
+                name={field}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                value={formData[field]}
+                onChange={handleInputChange}
+                className="p-2 bg-neutral-700 rounded"
+              />
+            ))}
             <select
               name="country"
               value={formData.country}
@@ -237,30 +219,6 @@ const MyBusinesses = () => {
               <option value="USA">USA</option>
               <option value="UK">UK</option>
             </select>
-            <input
-              type="text"
-              name="phoneNumber"
-              placeholder="Phone number"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
-            <input
-              type="text"
-              name="website"
-              placeholder="Website"
-              value={formData.website}
-              onChange={handleInputChange}
-              className="p-2 bg-neutral-700 rounded"
-            />
           </div>
 
           <div className="flex justify-end gap-4 mt-4">
@@ -274,7 +232,7 @@ const MyBusinesses = () => {
               className="bg-green-600 px-4 py-2 rounded-md"
               onClick={handleSave}
             >
-              Save
+              {editIndex !== null ? "Update" : "Save"}
             </button>
           </div>
         </div>

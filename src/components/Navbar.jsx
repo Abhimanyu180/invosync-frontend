@@ -87,7 +87,7 @@ const Navbar = () => {
                   {companyName}
                 </p>
                 <p
-                  onClick={() => navigate('/personal/setting')}
+                  onClick={() => navigate('/setting')}
                   className="p-2 rounded cursor-pointer hover:bg-neutral-500"
                 >
                   Personal Settings
