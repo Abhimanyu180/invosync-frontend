@@ -11,6 +11,7 @@ import PrivateRoute from "./PrivateRoute";
 import CreateClient from "./pages/CreateClient";
 import Clients from "./pages/Clients";
 import Setting from "./pages/Setting";
+import InvoiceDetail from "./components/InvoiceDetail";
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
           <Route path="/company/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/invoice" element={<PrivateRoute><InvoicePage /></PrivateRoute>} />
           <Route path="/invoices" element={<Invoices />} />
+          <Route path="/invoice/:id" element={<InvoiceDetail/>} />
           <Route path="/products" element={<ProductSection />} />
           <Route path="/create/products" element={<NewProduct />} />
           <Route path="/setting" element={<Setting />} />
